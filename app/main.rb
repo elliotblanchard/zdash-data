@@ -1,4 +1,8 @@
 require 'active_record'
+require 'json'
+require 'open-uri'
+require 'pry'
+
 # require_relative './models/transaction'
 
 def db_configuration
@@ -8,4 +12,9 @@ end
 
 ActiveRecord::Base.establish_connection(db_configuration['development'])
 
-print 'Hello world'
+request_uri = 'https://api.zcha.in/v2/mainnet/transactions?sort=timestamp&direction=descending&limit=1&offset=0'
+buffer = open(request_uri).read
+result = JSON.parse(buffer)
+binding.pry
+
+# REMEMBER to rate limit API calls

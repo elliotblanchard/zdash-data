@@ -50,4 +50,6 @@ end
 # binding.pry
 
 # REMEMBER to rate limit API calls
-# Use the timestamp to see when you can stop? Is it to the millisecond?
+# NO - transactions can/do share timestamps Use the timestamp to see when you can stop? Is it to the millisecond?
+# Perhaps you can overshoot so you know you can stop when you're a minute past the last timestamp or something
+# like that

@@ -2,8 +2,7 @@ require 'active_record'
 require 'json'
 require 'open-uri'
 require 'pry'
-
-# require_relative './models/transaction'
+require_relative './models/transaction'
 
 def db_configuration
   db_configuration_file = File.join(File.expand_path('..', __FILE__), '..', 'db', 'config.yml')
@@ -18,3 +17,4 @@ result = JSON.parse(buffer)
 binding.pry
 
 # REMEMBER to rate limit API calls
+# Use the timestamp to see when you can stop? Is it to the millisecond?

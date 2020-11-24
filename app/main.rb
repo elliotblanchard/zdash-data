@@ -2,7 +2,10 @@ require 'active_record'
 require 'json'
 require 'open-uri'
 require 'pry'
+require 'colorize'
 require_relative './models/transaction'
+
+max_block_size = 20
 
 def db_configuration
   db_configuration_file = File.join(File.expand_path('..', __FILE__), '..', 'db', 'config.yml')
@@ -11,45 +14,52 @@ end
 
 ActiveRecord::Base.establish_connection(db_configuration['development'])
 
-request_uri = 'https://api.zcha.in/v2/mainnet/transactions?sort=timestamp&direction=descending&limit=1&offset=0'
-buffer = open(request_uri).read
-result = JSON.parse(buffer)
-
-current_result = result[0]
-transaction = Transaction.create(
-    zhash: current_result['hash'], 
-    mainChain: current_result['mainChain'],
-    fee: current_result['fee'], 
-    ttype: current_result['type'],
-    shielded: current_result['shielded'],
-    index: current_result['index'],
-    blockHash: current_result['blockHash'],
-    blockHeight: current_result['blockHeight'],
-    version: current_result['version'],
-    lockTime: current_result['lockTime'],
-    timestamp: current_result['timestamp'],
-    time: current_result['time'],
-    vin: current_result['vin'],
-    vout: current_result['vout'],
-    vjoinsplit: current_result['vjoinsplit'],
-    vShieldedOutput: current_result['vShieldedOutput'],
-    vShieldedSpend: current_result['vShieldedSpend'],
-    valueBalance: current_result['valueBalance'],
-    value: current_result['value'],
-    outputValue: current_result['outputValue'],
-    shieldedValue: current_result['shieldedValue'],
-    overwintered: current_result['overwintered']
-)
-
-if transaction.valid?
-  print 'transaction saved'
-else
-  print 'transaction invalid'
-end
-
-# binding.pry
-
 # REMEMBER to rate limit API calls
-# NO - transactions can/do share timestamps Use the timestamp to see when you can stop? Is it to the millisecond?
-# Perhaps you can overshoot so you know you can stop when you're a minute past the last timestamp or something
-# like that
+# NO - transactions can/do share timestamps Use the timestamp to see when you can stop? It's to the SECOND only
+# Perhaps you can overshoot so you know you can stop when you're a minute past the last timestamp of the PREVIOUS
+# last entry in the DB before you start your pass or something like that.
+# Probably better to go through the entire DAY the last transaction in the DB was on so you minimize missed entries
+
+request_uri = "https://api.zcha.in/v2/mainnet/transactions?sort=timestamp&direction=descending&limit=#{max_block_size}&offset=0"
+buffer = open(request_uri).read
+transactions = JSON.parse(buffer)
+
+transactions.each_with_index do |transaction, index|
+  t = Transaction.create(
+    zhash: transaction['hash'], 
+    mainChain: transaction['mainChain'],
+    fee: transaction['fee'], 
+    ttype: transaction['type'],
+    shielded: transaction['shielded'],
+    index: transaction['index'],
+    blockHash: transaction['blockHash'],
+    blockHeight: transaction['blockHeight'],
+    version: transaction['version'],
+    lockTime: transaction['lockTime'],
+    timestamp: transaction['timestamp'],
+    time: transaction['time'],
+    vin: transaction['vin'],
+    vout: transaction['vout'],
+    vjoinsplit: transaction['vjoinsplit'],
+    vShieldedOutput: transaction['vShieldedOutput'],
+    vShieldedSpend: transaction['vShieldedSpend'],
+    valueBalance: transaction['valueBalance'],
+    value: transaction['value'],
+    outputValue: transaction['outputValue'],
+    shieldedValue: transaction['shieldedValue'],
+    overwintered: transaction['overwintered']
+  )
+
+  transaction_time = Time.at(transaction['timestamp']).to_datetime.strftime('%I:%M%p %a %m/%d/%y')
+
+  print "#{index+1}. Transaction "
+  print "#{transaction['hash'][0..10]}... ".colorize(:light_blue)
+  print "at "
+  print "#{transaction_time} ".colorize(:yellow)
+
+  if t.valid?
+    print "saved \n".colorize(:green)
+  else
+    print "not saved #{t.errors.messages} \n".colorize(:red)
+  end
+end

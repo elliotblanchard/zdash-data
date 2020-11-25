@@ -17,10 +17,14 @@ def get_transactions_block(offset = 0,last_timestamp)
   request_uri = "#{uri_base}#{max_block_size}&offset=#{offset}"
 
   begin
+    retries ||= 0
     buffer = open(request_uri).read
   rescue => e
-    print "\nServer error, retrying...".colorize(:cyan)
-    sleep(0.5)
+    retries += 1
+    print "\nError #{e.inspect}, retrying (attempt #{retries})...".colorize(:cyan)
+    sleep(30)
+    $server_error = true
+    print "retrying"
     retry
   end
 
@@ -86,24 +90,40 @@ ActiveRecord::Base.establish_connection(db_configuration['development'])
 
 # Get the LAST (first) entry from Transactions
 # See what the TIMESTAMP was, set that to last_timestamp
-last_timestamp = Transaction.last.timestamp
+last_timestamp = Transaction.first.timestamp
 
 # Set job_complete to false
 $job_complete = false
+$server_error = false
 
 # Set offset to 0
-offset = 0
+offset = 4000
+rest_counter = 0
 
 # Start while loop (while job complete == false)
 while $job_complete == false
-  # Launch a new thread
-  Thread.new{ get_transactions_block(offset, last_timestamp) }
+  # Launch a new thread - if the server is active
+  if $server_error == false
+    Thread.new{ get_transactions_block(offset, last_timestamp) }
 
-  # WAIT 1/5 second
-  sleep(0.5)
+    # WAIT 1/5 second
+    sleep(1)
 
-  # Increase offset by 15
-  offset += 15
+    # Increase offset by 15
+    offset += 15
+    rest_counter += 1
+
+    if rest_counter == 250
+      print "\nPausing execution"
+      sleep(60)
+      rest_counter = 0
+    end
+  else
+    print "\nServer is down. Pausing for 120 seconds"
+    sleep(120)
+    print "\nResuming"
+    $server_error = false
+  end
 end
 
 # WAIT 10 seconds for all threads to complete

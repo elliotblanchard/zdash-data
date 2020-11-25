@@ -15,7 +15,15 @@ def get_transactions_block(offset = 0,last_timestamp)
   uri_base = 'https://api.zcha.in/v2/mainnet/transactions?sort=timestamp&direction=descending&limit='
 
   request_uri = "#{uri_base}#{max_block_size}&offset=#{offset}"
-  buffer = open(request_uri).read
+
+  begin
+    buffer = open(request_uri).read
+  rescue => e
+    print "\nServer error, retrying...".colorize(:cyan)
+    sleep(0.5)
+    retry
+  end
+
   transactions = JSON.parse(buffer)
 
   transactions.each_with_index do |transaction, index|
@@ -54,15 +62,16 @@ def get_transactions_block(offset = 0,last_timestamp)
     print "#{transaction['timestamp'].to_i - (last_timestamp - 3600)} ".colorize(:blue)
  
     if t.valid?
-      print "saved \n".colorize(:green)
+      print "saved".colorize(:green)
     else
-      print "not saved #{t.errors.messages} \n".colorize(:red)
+      print "not saved #{t.errors.messages}".colorize(:red)
     end
 
     # If timestamp of last transaction was last_timestamp - 3600 (seconds = 1 hour), set job_complete to TRUE so loop ends
     if transaction['timestamp'].to_i < (last_timestamp - 3600)
-      print 'Job COMPLETE'.colorize(:green)
+      print '\nJob COMPLETE'.colorize(:green)
       $job_complete = true
+      break
     end
   end
 end
@@ -86,13 +95,12 @@ $job_complete = false
 offset = 0
 
 # Start while loop (while job complete == false)
-#for i in 0..5
 while $job_complete == false
   # Launch a new thread
   Thread.new{ get_transactions_block(offset, last_timestamp) }
 
   # WAIT 1/5 second
-  sleep(1)
+  sleep(0.5)
 
   # Increase offset by 15
   offset += 15

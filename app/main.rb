@@ -71,9 +71,9 @@ def get_transactions_block(offset = 0,last_timestamp)
       print "not saved #{t.errors.messages}".colorize(:red)
     end
 
-    # If timestamp of last transaction was last_timestamp - 3600 (seconds = 1 hour), set job_complete to TRUE so loop ends
+    # If timestamp of last transaction was last_timestamp - 3600 (seconds = 1 hour), 
+    # set job_complete to TRUE so loop ends
     if transaction['timestamp'].to_i < (last_timestamp - 3600)
-      print "\nJob COMPLETE".colorize(:green)
       $job_complete = true
       break
     end
@@ -82,57 +82,46 @@ end
 
 ActiveRecord::Base.establish_connection(db_configuration['development'])
 
-# REMEMBER to RATE LIMIT API calls
-# NO - transactions can/do share timestamps Use the timestamp to see when you can stop? It's to the SECOND only
-# Perhaps you can overshoot so you know you can stop when you're a minute past the last timestamp of the PREVIOUS
-# last entry in the DB before you start your pass or something like that.
-# Probably better to go through the entire DAY the last transaction in the DB was on so you minimize missed entries
-
-# This is WRONG. This isn't the last time stamp.
-# This is the last record added to the DB, which 
-# could be ANY timestamp. You need to actually
-# for the newest timestamp
 last_timestamp = Transaction.maximum('timestamp')
 
-# Set job_complete to false
 $job_complete = false
 $server_error = false
 
-# Set offset to 0 (this api starts to degrade after offset of ~4000,
-# so you'll have to hit it several times a day)
 offset = 0
 rest_counter = 0
 
-# Start while loop (while job complete == false)
-while $job_complete == false
-  # Launch a new thread - if the server is active
-  if $server_error == false
-    Thread.new{ get_transactions_block(offset, last_timestamp) }
+# Parent loop to get new transactions every few hours
+while 1 == 1
+    # Main loop to get latest transactions (while job complete == false)
+    while $job_complete == false
+        # Launch a new thread - if the server is active
+        if $server_error == false
+            Thread.new{ get_transactions_block(offset, last_timestamp) }
 
-    # WAIT 1/5 second
-    sleep(1)
+            # WAIT 1/5 second
+            sleep(1)
 
-    # Increase offset by 15
-    offset += 15
-    rest_counter += 1
+            # Increase offset by 15
+            offset += 15
+            rest_counter += 1
 
-    if rest_counter == 250
-      print "\nPausing execution"
-      sleep(60)
-      rest_counter = 0
+            if rest_counter == 250
+            print "\nPausing execution"
+            sleep(60)
+            rest_counter = 0
+            end
+        else
+            print "\nServer is down. Pausing for 120 seconds"
+            sleep(120)
+            print "\nResuming"
+            $server_error = false
+        end
     end
-  else
-    print "\nServer is down. Pausing for 120 seconds"
-    sleep(120)
-    print "\nResuming"
-    $server_error = false
-  end
+    # WAIT 60 seconds for all threads to complete
+    sleep(60)
+    print "\nFinished getting latest transactions. Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}. Waiting for 5 hours..."
+    sleep(5.hours)
 end
 
-# WAIT 10 seconds for all threads to complete
-sleep(30)
-
-#binding.pry
-
-#t1 = Thread.new{ get_transactions_block(0) }
-#t1.join # waits for the thread to finish (otherwise program ends before anything is rec'ed / printed)
+# WAIT 60 seconds for all threads to complete
+sleep(60)

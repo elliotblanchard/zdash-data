@@ -73,7 +73,7 @@ def get_transactions_block(offset = 0,last_timestamp)
 
     # If timestamp of last transaction was last_timestamp - 3600 (seconds = 1 hour), set job_complete to TRUE so loop ends
     if transaction['timestamp'].to_i < (last_timestamp - 3600)
-      print '\nJob COMPLETE'.colorize(:green)
+      print "\nJob COMPLETE".colorize(:green)
       $job_complete = true
       break
     end
@@ -88,16 +88,19 @@ ActiveRecord::Base.establish_connection(db_configuration['development'])
 # last entry in the DB before you start your pass or something like that.
 # Probably better to go through the entire DAY the last transaction in the DB was on so you minimize missed entries
 
-# Get the LAST (first) entry from Transactions
-# See what the TIMESTAMP was, set that to last_timestamp
-last_timestamp = Transaction.first.timestamp
+# This is WRONG. This isn't the last time stamp.
+# This is the last record added to the DB, which 
+# could be ANY timestamp. You need to actually
+# for the newest timestamp
+last_timestamp = Transaction.maximum('timestamp')
 
 # Set job_complete to false
 $job_complete = false
 $server_error = false
 
-# Set offset to 0
-offset = 4000
+# Set offset to 0 (this api starts to degrade after offset of ~4000,
+# so you'll have to hit it several times a day)
+offset = 0
 rest_counter = 0
 
 # Start while loop (while job complete == false)

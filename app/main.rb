@@ -82,8 +82,6 @@ def get_transactions_block(offset = 0,last_timestamp)
   end
 end
 
-$job_complete = false
-$server_error = false
 offset = 0
 offset_increment = 15
 interval_thread_launch = 0.2
@@ -96,6 +94,8 @@ last_timestamp = Transaction.maximum('timestamp')
 
 # Parent loop to get new transactions every few hours
 while 1 == 1
+  $job_complete = false
+  $server_error = false
   # Main loop to get latest transactions (while job complete == false)
   while $job_complete == false
     # Launch a new thread - if the server is active

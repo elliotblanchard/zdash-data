@@ -77,12 +77,12 @@ def get_transactions_block(offset = 0,last_timestamp)
     # that may have been missed in the last loop
     if transaction['timestamp'].to_i < (last_timestamp - transaction_overlap)
       $job_complete = true
+      print "\nJob complete!"
       break
     end
   end
 end
 
-offset = 0
 offset_increment = 15
 interval_thread_launch = 0.2
 interval_server_down = 120
@@ -90,12 +90,14 @@ interval_threads_complete = 60
 interval_jobs = 18000
 
 ActiveRecord::Base.establish_connection(db_configuration['development'])
-last_timestamp = Transaction.maximum('timestamp')
 
 # Parent loop to get new transactions every few hours
 while 1 == 1
   $job_complete = false
   $server_error = false
+  offset = 0
+  last_timestamp = Transaction.maximum('timestamp')
+  print "\nGetting new transactions. Last timestamp is: #{last_timestamp}"
   # Main loop to get latest transactions (while job complete == false)
   while $job_complete == false
     # Launch a new thread - if the server is active
@@ -112,9 +114,14 @@ while 1 == 1
   end
   # WAIT for all threads to complete
   sleep(interval_threads_complete)
+  # Kill all threads
+  Thread.list.each do |thread|
+    print "\nKilling thread"
+    thread.exit unless thread == Thread.current
+  end
   print "\nFinished getting latest transactions."
   print " Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}."
-  print " Waiting for #{interval_jobs/3600} hours..."
+  print " Waiting for #{interval_jobs/3600.0} hours..."
   sleep(interval_jobs)
 end
 

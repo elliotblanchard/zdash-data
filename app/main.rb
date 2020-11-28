@@ -118,11 +118,11 @@ while 1 == 1
       Thread.new{ get_transactions_block(offset, last_timestamp) }
       sleep(interval_thread_launch)
       offset += offset_increment
-      doubling_counter = offset
+      doubling_counter += offset_increment
       if doubling_counter > interval_increase
         doubling_counter = 0
         interval_thread_launch += interval_increment
-        print "Increasing thread launch interval. New interval: #{interval_thread_launch} seconds"
+        print "\nIncreasing thread launch interval. New interval: #{interval_thread_launch} seconds"
       end
     else
       print "\nServer is down. Pausing for #{interval_server_down} seconds"

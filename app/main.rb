@@ -12,12 +12,13 @@ end
 
 def get_transactions_block(offset = 0,last_timestamp)
 
-  print "\nLaunching thread."
-  print "\nOffeset is: #{offset}"
-  print " Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}."
+  # print "\nLaunching thread. "
+  # print "Offeset is: #{offset}"
+  # print " Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}."
 
   max_block_size = 20
-  transaction_overlap = 3600
+  retry_pause = 30
+  transaction_overlap = 1000000000
   uri_base = 'https://api.zcha.in/v2/mainnet/transactions?sort=timestamp&direction=descending&limit='
 
   request_uri = "#{uri_base}#{max_block_size}&offset=#{offset}"
@@ -28,7 +29,7 @@ def get_transactions_block(offset = 0,last_timestamp)
   rescue => e
     retries += 1
     print "\nError #{e.inspect}, retrying (attempt #{retries})...".colorize(:cyan)
-    sleep(30)
+    sleep(retry_pause)
     $server_error = true
     print 'retrying'
     retry
@@ -89,12 +90,13 @@ def get_transactions_block(offset = 0,last_timestamp)
   end
 end
 
-overlaps_to_stop = 200
+overlaps_to_stop = 20
 offset_increment = 15
-interval_thread_launch = 2
 interval_server_down = 120
 interval_threads_complete = 60
-interval_jobs = 18000
+interval_increase = 3000
+interval_increment = 5
+interval_jobs = 14400
 
 ActiveRecord::Base.establish_connection(db_configuration['development'])
 
@@ -104,7 +106,10 @@ while 1 == 1
   $overlaps = 0
   $server_error = false
   offset = 0
+  doubling_counter = 0
+  interval_thread_launch = 2
   last_timestamp = Transaction.maximum('timestamp')
+  
   print "\nGetting new transactions. Last timestamp is: #{last_timestamp}"
   # Main loop to get latest transactions (while job complete == false)
   while $overlaps < overlaps_to_stop
@@ -113,6 +118,12 @@ while 1 == 1
       Thread.new{ get_transactions_block(offset, last_timestamp) }
       sleep(interval_thread_launch)
       offset += offset_increment
+      doubling_counter = offset
+      if doubling_counter > interval_increase
+        doubling_counter = 0
+        interval_thread_launch += interval_increment
+        print "Increasing thread launch interval. New interval: #{interval_thread_launch} seconds"
+      end
     else
       print "\nServer is down. Pausing for #{interval_server_down} seconds"
       sleep(interval_server_down)

@@ -4,6 +4,7 @@ require 'open-uri'
 require 'pry'
 require 'colorize'
 require_relative './models/transaction'
+require_relative './helpers/classify'
 
 def db_configuration
   db_configuration_file = File.join(File.expand_path('..', __FILE__), '..', 'db', 'config.yml')
@@ -12,13 +13,13 @@ end
 
 def get_transactions_block(offset = 0,last_timestamp)
 
-  # print "\nLaunching thread. "
+  print "\nLaunching thread. "
   # print "Offeset is: #{offset}"
   # print " Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}."
 
   max_block_size = 20
   retry_pause = 30
-  transaction_overlap = 1000000000
+  transaction_overlap = 3600
   uri_base = 'https://api.zcha.in/v2/mainnet/transactions?sort=timestamp&direction=descending&limit='
 
   request_uri = "#{uri_base}#{max_block_size}&offset=#{offset}"
@@ -63,6 +64,10 @@ def get_transactions_block(offset = 0,last_timestamp)
       overwintered: transaction['overwintered']
     )
 
+    category = Classify.classify_transaction(t)
+    t.update(category: category)
+    
+
     transaction_time = Time.at(transaction['timestamp']).to_datetime.strftime('%I:%M%p %a %m/%d/%y')
 
     print "\n#{offset+index+1}. "
@@ -95,7 +100,7 @@ offset_increment = 15
 interval_server_down = 120
 interval_threads_complete = 60
 interval_increase = 3000
-interval_increment = 5
+interval_increment = 3
 interval_jobs = 14400
 
 ActiveRecord::Base.establish_connection(db_configuration['development'])

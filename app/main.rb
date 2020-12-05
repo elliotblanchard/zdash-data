@@ -19,7 +19,7 @@ def get_transactions_block(offset = 0,last_timestamp)
 
   max_block_size = 20
   retry_pause = 30
-  transaction_overlap = 3600
+  transaction_overlap = 1000
   uri_base = 'https://api.zcha.in/v2/mainnet/transactions?sort=timestamp&direction=descending&limit='
 
   request_uri = "#{uri_base}#{max_block_size}&offset=#{offset}"

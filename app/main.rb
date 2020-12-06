@@ -65,10 +65,10 @@ def get_transactions_block(offset = 0,last_timestamp)
     )
 
     category = Classify.classify_transaction(t)
-    if !t.update(category: category)
+    unless t.update(category: category)
       t.destroy # Because duplicate zhash
     end
-    
+
     transaction_time = Time.at(transaction['timestamp']).to_datetime.strftime('%I:%M%p %a %m/%d/%y')
 
     print "\n#{offset+index+1}. "

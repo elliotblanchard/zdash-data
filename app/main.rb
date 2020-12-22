@@ -113,7 +113,7 @@ while 1 == 1
   $server_error = false
   offset = 0
   doubling_counter = 0
-  interval_thread_launch = 2
+  interval_thread_launch = 4
   last_timestamp = Transaction.maximum('timestamp')
   
   print "\nGetting new transactions. Last timestamp is: #{last_timestamp}"

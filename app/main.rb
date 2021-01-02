@@ -6,16 +6,14 @@ require 'colorize'
 require_relative './models/transaction'
 require_relative './helpers/classify'
 
+clear_line = "\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"
+
 def db_configuration
   db_configuration_file = File.join(File.expand_path('..', __FILE__), '..', 'db', 'config.yml')
   YAML.load(File.read(db_configuration_file))
 end
 
 def get_transactions_block(offset = 0,last_timestamp)
-
-  print "\nLaunching thread. "
-  # print "Offeset is: #{offset}"
-  # print " Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}."
 
   max_block_size = 20
   retry_pause = 30
@@ -29,9 +27,8 @@ def get_transactions_block(offset = 0,last_timestamp)
     buffer = open(request_uri).read
   rescue => e
     retries += 1
-    print "\nError #{e.inspect}, retrying (attempt #{retries})...".colorize(:cyan)
+    print "\nError #{e.inspect}, retrying...".colorize(:cyan)
     sleep(retry_pause)
-    $server_error = true
     print 'retrying'
     retry
   end
@@ -77,23 +74,15 @@ def get_transactions_block(offset = 0,last_timestamp)
     print "#{transaction_time} ".colorize(:yellow)
     print "timestamp: #{transaction['timestamp']} "
     print '/ '
-    print "#{transaction['timestamp'].to_i - (last_timestamp - transaction_overlap)} ".colorize(:blue)
+    print "#{transaction['timestamp'] - last_timestamp} ".colorize(:blue)
  
     if t.valid?
       print "saved".colorize(:green)
     else
       print "not saved #{t.errors.messages}".colorize(:red)
     end
-
-    # If timestamp of last transaction was last_timestamp - transaction_overlap
-    # set job_complete to TRUE so loop ends. The overlap is to catch any transactions
-    # that may have been missed in the last loop
-    if transaction['timestamp'].to_i < (last_timestamp - transaction_overlap)
-      $overlaps += 1
-      print "\nOverlaps found: #{$overlaps}"
-      break
-    end
   end
+  transactions.last['timestamp']
 end
 
 overlaps_to_stop = 20
@@ -109,46 +98,22 @@ ActiveRecord::Base.establish_connection(db_configuration['development'])
 # Parent loop to get new transactions every few hours
 while 1 == 1
   # $job_complete = false
-  $overlaps = 0
-  $server_error = false
   offset = 0
   doubling_counter = 0
   interval_thread_launch = 4
-  last_timestamp = Transaction.maximum('timestamp')
+  #last_timestamp = Transaction.maximum('timestamp')
+  last_timestamp = 1609593782
+  current_timestamp = Float::INFINITY
   
   print "\nGetting new transactions. Last timestamp is: #{last_timestamp}"
   # Main loop to get latest transactions (while job complete == false)
-  while $overlaps < overlaps_to_stop
+  while last_timestamp < current_timestamp
     # Launch a new thread - if the server is active
-    if $server_error == false
-      Thread.new{ get_transactions_block(offset, last_timestamp) }
-      sleep(interval_thread_launch)
-      offset += offset_increment
-      doubling_counter += offset_increment
-      if doubling_counter > interval_increase
-        doubling_counter = 0
-        interval_thread_launch += interval_increment
-        print "\nIncreasing thread launch interval. New interval: #{interval_thread_launch} seconds"
-      end
-    else
-      print "\nServer is down. Pausing for #{interval_server_down} seconds"
-      sleep(interval_server_down)
-      print "\nResuming"
-      $server_error = false
-    end
-  end
-  # WAIT for all threads to complete
-  sleep(interval_threads_complete)
-  # Kill all threads
-  Thread.list.each do |thread|
-    print "\nKilling thread"
-    thread.exit unless thread == Thread.current
+    current_timestamp = get_transactions_block(offset, last_timestamp)
+    offset += offset_increment
   end
   print "\nFinished getting latest transactions."
   print " Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}."
   print " Waiting for #{interval_jobs/3600.0} hours..."
   sleep(interval_jobs)
 end
-
-# WAIT for all threads to complete
-sleep(interval_threads_complete)

@@ -4,7 +4,6 @@ module Classify
     # d456a889ddc87ad41e379de5bb245781333fd883b67bf34eebabd1a6fb7e144a
     # d2ebc0cfd864027eb0887e1dcb772b4d1ca7bc016504889a6843583c2ca73bb4
     # f0d27409c193fef51b66a922794583f08c880ab220229c813995143e1cd244d5
-    # c13632d045a685dfead48b62ceb8d0adb188fef9e3f902c65112a88a4dbed4fe
 
     if transaction
       if transaction.vin.length > 2

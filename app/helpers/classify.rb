@@ -8,8 +8,7 @@ module Classify
     if transaction
       if transaction.vin.length > 2
         parsed = transaction.vin.split(',')
-        #if parsed[0].length > 18 # this is wrong - you need to look for the string "coinbase"
-        if parsed[0].include? "coinbase" 
+        if parsed[0].length > 18 
           # vin arr contains coinbase field w/address
           # !!! check this carefully to see that it works
           if transaction.vout.length > 2

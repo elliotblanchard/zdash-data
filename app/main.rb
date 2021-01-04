@@ -100,7 +100,7 @@ offset_increment = 15
 
 ActiveRecord::Base.establish_connection(db_configuration['development'])
 
-filename = 'log/log.txt'
+filename = '/Users/elliotblanchard/Development/code/react-redux-final-zdash/zdash-data/log/log.txt'
 
 if File.exist?(filename)
   log_file = File.open(filename, 'a')
@@ -109,13 +109,13 @@ else
 end
 
 offset = 0
-overlap = 900 # 15 minutes
+overlap = 300 # 5 minutes
 trans_saved = 0
 trans_failed = 0
 last_timestamp = Transaction.maximum('timestamp')
 current_timestamp = Float::INFINITY
 
-log_file.write("Getting new transactions. Last timestamp is: #{last_timestamp}\n")
+log_file.write("Getting new transactions. Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}. Last timestamp is: #{last_timestamp}\n")
 print("Getting new transactions. Last timestamp is: #{last_timestamp}\n")
 
 while (last_timestamp - overlap) < current_timestamp

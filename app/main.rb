@@ -27,6 +27,7 @@ def get_transactions_block(offset = 0,last_timestamp)
     print "\nError #{e.inspect}, retrying...".colorize(:cyan)
     sleep(retry_pause)
     print 'retrying'
+    # !!!! You need to have it stop and log failure after a certain number of retries !!! #
     retry
   end
 

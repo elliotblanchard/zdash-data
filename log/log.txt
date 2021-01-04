@@ -1,0 +1,15 @@
+Getting new transactions. Last timestamp is: 1609770922
+Finished getting latest transactions. 0 saved and 0 failed.
+Current time is: 11:44AM Mon 01/04/21.
+
+Getting new transactions. Last timestamp is: 1609777018
+Finished getting latest transactions. 0 saved and 0 failed.
+Current time is: 02:25PM Mon 01/04/21.
+
+Getting new transactions. Last timestamp is: 1609783637
+Finished getting latest transactions. 0 saved and 0 failed.
+Current time is: 04:34PM Mon 01/04/21.
+
+Getting new transactions. Last timestamp is: 1609790133
+Getting new transactions. Last timestamp is: 1609790133
+Getting new transactions. Last timestamp is: 1609790133

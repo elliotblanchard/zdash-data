@@ -11,10 +11,11 @@ def db_configuration
   YAML.load(File.read(db_configuration_file))
 end
 
-def get_transactions_block(offset = 0,last_timestamp)
+def get_transactions_block(offset = 0,last_timestamp, log_file, trans_saved, trans_failed)
 
   max_block_size = 20
   retry_pause = 30
+  max_retries = 20
   uri_base = 'https://api.zcha.in/v2/mainnet/transactions?sort=timestamp&direction=descending&limit='
 
   request_uri = "#{uri_base}#{max_block_size}&offset=#{offset}"
@@ -23,12 +24,17 @@ def get_transactions_block(offset = 0,last_timestamp)
     retries ||= 0
     buffer = open(request_uri).read
   rescue => e
-    retries += 1
-    print "\nError #{e.inspect}, retrying...".colorize(:cyan)
-    sleep(retry_pause)
-    print 'retrying'
-    # !!!! You need to have it stop and log failure after a certain number of retries !!! #
-    retry
+    if retries < max_retries
+      retries += 1
+      # print "\nError #{e.inspect}, retrying...".colorize(:cyan)
+      sleep(retry_pause)
+      # print 'retrying'
+      # !!!! You need to have it stop and log failure after a certain number of retries !!! #
+      retry
+    else
+      log_file.write("Max retries of #{max_retries} hit. Can't reach API. Shutting down.\n\n")
+      exit(false)
+    end
   end
 
   transactions = JSON.parse(buffer)
@@ -66,6 +72,7 @@ def get_transactions_block(offset = 0,last_timestamp)
 
     transaction_time = Time.at(transaction['timestamp']).to_datetime.strftime('%I:%M%p %a %m/%d/%y')
 
+=begin
     print "\n#{offset+index+1}. "
     print "#{transaction['hash'][0..5]}... ".colorize(:light_blue)
     print 'category '
@@ -75,37 +82,49 @@ def get_transactions_block(offset = 0,last_timestamp)
     print "timestamp: #{transaction['timestamp']} "
     print '/ '
     print "#{transaction['timestamp'] - last_timestamp} ".colorize(:blue)
+=end
  
     if t.valid?
-      print "saved".colorize(:green) # keep count of number saved for log
+      # print "saved".colorize(:green) # keep count of number saved for log
+      trans_saved += 1
     else
-      print "not saved #{t.errors.messages}".colorize(:red) # keep count of number not saved for log
+      # print "not saved #{t.errors.messages}".colorize(:red) # keep count of number not saved for log
+      trans_failed += 1
     end
   end
   transactions.last['timestamp']
 end
 
 offset_increment = 15
-interval_jobs = 7200 # 2 hours
+# interval_jobs = 7200 # 2 hours
 
 ActiveRecord::Base.establish_connection(db_configuration['development'])
 
-# Parent loop to get new transactions every few hours
-while 1 == 1
-  offset = 0
-  overlap = 900 # 15 minutes
-  last_timestamp = Transaction.maximum('timestamp')
-  current_timestamp = Float::INFINITY
-  
-  print "\nGetting new transactions. Last timestamp is: #{last_timestamp}"
-  # Main loop to get latest transactions (while job complete == false)
-  while ((last_timestamp - overlap) < current_timestamp)
-    # Launch a new thread - if the server is active
-    current_timestamp = get_transactions_block(offset, last_timestamp)
-    offset += offset_increment
-  end
-  print "\nFinished getting latest transactions."
-  print " Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}."
-  print " Waiting for #{interval_jobs/3600.0} hours..."
-  sleep(interval_jobs)
+filename = 'log/log.txt'
+
+if File.exist?(filename)
+  log_file = File.open(filename, 'a')
+else
+  log_file = File.new(filename, 'w+')
 end
+
+offset = 0
+overlap = 450 # 7.5 minutes
+trans_saved = 0
+trans_failed = 0
+last_timestamp = Transaction.maximum('timestamp')
+current_timestamp = Float::INFINITY
+
+log_file.write("Getting new transactions. Last timestamp is: #{last_timestamp}\n")
+
+=begin
+while (last_timestamp - overlap) < current_timestamp
+  current_timestamp = get_transactions_block(offset, last_timestamp, log_file, trans_saved, trans_failed)
+  offset += offset_increment
+end
+=end
+log_file.write("Finished getting latest transactions. #{trans_saved} saved and #{trans_failed} failed.\n")
+log_file.write("Current time is: #{DateTime.now.strftime('%I:%M%p %a %m/%d/%y')}.\n\n")
+exit(true)
+# print " Waiting for #{interval_jobs/3600.0} hours..."
+

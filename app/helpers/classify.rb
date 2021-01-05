@@ -47,7 +47,7 @@ module Classify
         end
       end
     else
-      return nil
+      nil
     end
   end
 end

@@ -42,7 +42,7 @@ def get_transactions_block(offset = 0,last_timestamp, log_file)
   transactions = JSON.parse(buffer)
 
   transactions.each_with_index do |transaction, index|
-    t = Transaction.create(
+    t = Transaction.new(
       zhash: transaction['hash'],
       mainChain: transaction['mainChain'],
       fee: transaction['fee'],
@@ -67,14 +67,14 @@ def get_transactions_block(offset = 0,last_timestamp, log_file)
       overwintered: transaction['overwintered']
     )
 
-    category = Classify.classify_transaction(t)
-    unless t.update(category: category)
+    t.category = Classify.classify_transaction(t)
+    unless t.save
       t.destroy # Because duplicate zhash
     end
  
     transaction_time = Time.at(transaction['timestamp']).to_datetime.strftime('%I:%M%p %a %m/%d/%y')
 
-    print "\n#{offset+index+1}. "
+    print "\n#{offset + index + 1}. "
     print "#{transaction['hash'][0..5]}... ".colorize(:light_blue)
     print 'category '
     print "#{t['category']}. ".colorize(:light_blue)
@@ -91,6 +91,7 @@ def get_transactions_block(offset = 0,last_timestamp, log_file)
       # print "not saved #{t.errors.messages}".colorize(:red) # keep count of number not saved for log
       trans_failed += 1
     end
+    
   end
   return_arr = [transactions.last['timestamp'], trans_saved, trans_failed]
 end

@@ -7,6 +7,7 @@ gem "colorize", "~> 0.8.1"
 gem 'activerecord'
 gem 'standalone_migrations'
 gem 'pry', '~> 0.13.1'
+gem 'activerecord-import', '~> 1.0', '>= 1.0.7'
 
 # Use postgresql as the database for Active Record
 gem 'pg', '>= 0.18', '< 2.0'

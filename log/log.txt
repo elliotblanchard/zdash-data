@@ -1,42 +1,38 @@
-Getting new transactions. Last timestamp is: 1609770922
-Finished getting latest transactions. 0 saved and 0 failed.
-Current time is: 11:44AM Mon 01/04/21.
+Getting new transactions. Current time is: 08:33PM Mon 01/04/21. Last timestamp is: 1609801136
+Finished getting latest transactions. 178 saved and 802 failed.
+Current time is: 09:01PM Mon 01/04/21.
 
-Getting new transactions. Last timestamp is: 1609777018
-Finished getting latest transactions. 0 saved and 0 failed.
-Current time is: 02:25PM Mon 01/04/21.
+Getting new transactions. Current time is: 09:59PM Mon 01/04/21. Last timestamp is: 1609810398
+Finished getting latest transactions. 557 saved and 463 failed.
+Current time is: 10:35PM Mon 01/04/21.
 
-Getting new transactions. Last timestamp is: 1609783637
-Finished getting latest transactions. 0 saved and 0 failed.
-Current time is: 04:34PM Mon 01/04/21.
+Getting new transactions. Current time is: 11:59PM Mon 01/04/21. Last timestamp is: 1609815541
+Finished getting latest transactions. 452 saved and 268 failed.
+Current time is: 12:15AM Tue 01/05/21.
 
-Getting new transactions. Last timestamp is: 1609790133
-Getting new transactions. Last timestamp is: 1609790133
-Getting new transactions. Last timestamp is: 1609790133
-Getting new transactions. Last timestamp is: 1609790133
-Finished getting latest transactions. 512 saved and 548 failed.
-Current time is: 05:31PM Mon 01/04/21.
+Getting new transactions. Current time is: 01:59AM Tue 01/05/21. Last timestamp is: 1609822729
+Finished getting latest transactions. 431 saved and 249 failed.
+Current time is: 02:14AM Tue 01/05/21.
 
-Getting new transactions. Current time is: 05:32PM Mon 01/04/21. Last timestamp is: 1609797488
-Finished getting latest transactions. 132 saved and 128 failed.
-Current time is: 05:41PM Mon 01/04/21.
+Getting new transactions. Current time is: 03:59AM Tue 01/05/21. Last timestamp is: 1609829934
+Finished getting latest transactions. 432 saved and 248 failed.
+Current time is: 04:15AM Tue 01/05/21.
 
-Getting new transactions. Current time is: 05:49PM Mon 01/04/21. Last timestamp is: 1609799553
-Finished getting latest transactions. 71 saved and 89 failed.
-Current time is: 05:53PM Mon 01/04/21.
+Getting new transactions. Current time is: 05:59AM Tue 01/05/21. Last timestamp is: 1609837121
+Finished getting latest transactions. 478 saved and 282 failed.
+Current time is: 06:17AM Tue 01/05/21.
 
-Getting new transactions. Current time is: 05:55PM Mon 01/04/21. Last timestamp is: 1609800476
-Finished getting latest transactions. 36 saved and 84 failed.
-Current time is: 05:58PM Mon 01/04/21.
+Getting new transactions. Current time is: 07:59AM Tue 01/05/21. Last timestamp is: 1609844356
+Finished getting latest transactions. 597 saved and 363 failed.
+Current time is: 08:21AM Tue 01/05/21.
 
-Getting new transactions. Current time is: 05:59PM Mon 01/04/21. Last timestamp is: 1609800916
-Finished getting latest transactions. 16 saved and 84 failed.
-Current time is: 06:02PM Mon 01/04/21.
+Getting new transactions. Current time is: 09:10AM Tue 01/05/21. Last timestamp is: 1609851551
+Getting new transactions. Current time is: 09:13AM Tue 01/05/21. Last timestamp is: 1609851551
+Getting new transactions. Current time is: 09:16AM Tue 01/05/21. Last timestamp is: 1609851551
+Finished getting latest transactions. 620 processed.
+Current time is: 09:31AM Tue 01/05/21.
 
-Getting new transactions. Current time is: 07:59PM Mon 01/04/21. Last timestamp is: 1609801136
-Finished getting latest transactions. 345 saved and 195 failed.
-Current time is: 08:18PM Mon 01/04/21.
+Getting new transactions. Current time is: 09:32AM Tue 01/05/21. Last timestamp is: 1609856114
+Finished getting latest transactions. 160 processed.
+Current time is: 09:33AM Tue 01/05/21.
 
-Getting new transactions. Current time is: 08:22PM Mon 01/04/21. Last timestamp is: 1609801136
-Getting new transactions. Current time is: 08:26PM Mon 01/04/21. Last timestamp is: 1609801136
-Getting new transactions. Current time is: 08:29PM Mon 01/04/21. Last timestamp is: 1609801136
